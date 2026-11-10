@@ -57,7 +57,7 @@ composer.setSize(
 document.body.style.margin = "0";
 document.body.appendChild(renderer.domElement);
 
-const COUNT = 100000;
+const COUNT = 250000;
 
 const positions = new Float32Array(COUNT * 3);
 const colors = new Float32Array(COUNT * 3);
