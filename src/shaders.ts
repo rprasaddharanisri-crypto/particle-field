@@ -10,9 +10,10 @@ void main() {
     modelViewMatrix *
     vec4(position, 1.0);
 
-  gl_PointSize =
-    4.0 *
-    (300.0 / -mvPosition.z);
+  gl_PointSize =max(
+    2.0,
+    8.0 * (20.0 / -mvPosition.z)
+  );
 
   gl_Position =
     projectionMatrix *
