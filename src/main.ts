@@ -4,8 +4,7 @@ import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
 import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
-
-
+import { vertexShader, fragmentShader } from "./shaders";
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x000000);
@@ -57,7 +56,7 @@ composer.setSize(
 document.body.style.margin = "0";
 document.body.appendChild(renderer.domElement);
 
-const COUNT = 250000;
+const COUNT = 100000;
 
 const positions = new Float32Array(COUNT * 3);
 const colors = new Float32Array(COUNT * 3);
@@ -97,28 +96,46 @@ geometry.setAttribute(
   new THREE.BufferAttribute(colors, 3)
 );
 
-const material = new THREE.PointsMaterial({
-  size: 0.02,
-  vertexColors: true,
+const material =new THREE.ShaderMaterial({
+  vertexShader,
+  fragmentShader,
   transparent: true,
-  opacity: 0.8,
+  depthWrite: false,
   blending: THREE.AdditiveBlending,
-  depthWrite: false
+  vertexColors: true
 });
-
 const particles = new THREE.Points(
   geometry,
   material
 );
 
 scene.add(particles);
+window.addEventListener("resize", () => {
 
+  camera.aspect =
+    window.innerWidth /
+    window.innerHeight;
+
+  camera.updateProjectionMatrix();
+
+  renderer.setSize(
+    window.innerWidth,
+    window.innerHeight
+  );
+
+  composer.setSize(
+    window.innerWidth,
+    window.innerHeight
+  );
+
+});
 function animate() {
   requestAnimationFrame(animate);
 
   particles.rotation.y += 0.001;
-  composer.render();
-  controls.update();
-}
 
+  controls.update();
+
+  composer.render();
+}
 animate();
