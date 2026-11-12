@@ -10,10 +10,22 @@ void main() {
   vec3 pos = position;
 
   pos.y +=
-    sin(
-      uTime +
-      position.x * 4.0
-    ) * 0.05;
+  sin(
+    uTime +
+    position.x * 4.0
+  ) * 0.05;
+
+pos.x +=
+  cos(
+    uTime * 0.7 +
+    position.z * 3.0
+  ) * 0.03;
+
+pos.z +=
+  sin(
+    uTime * 0.5 +
+    position.y * 3.0
+  ) * 0.03;
 
   vec4 mvPosition =
     modelViewMatrix *
