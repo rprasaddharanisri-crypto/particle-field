@@ -5,7 +5,7 @@ import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
 import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
 import { vertexShader, fragmentShader } from "./shaders";
-
+import { mulberry32 } from "./random";
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x000000);
 
@@ -60,7 +60,7 @@ const COUNT = 100000;
 
 const positions = new Float32Array(COUNT * 3);
 const colors = new Float32Array(COUNT * 3);
-
+const rand = mulberry32(1857823);
 for (let i = 0; i < COUNT; i++) {
   const i3 = i * 3;
 
@@ -68,10 +68,10 @@ for (let i = 0; i < COUNT; i++) {
   const r = 0.3 + Math.random() * 1.5;
 
   positions[i3] = Math.cos(t) * r;
-  positions[i3 + 1] = (Math.random() - 0.5) * 2.5;
+  positions[i3 + 1] =(rand() - 0.5) * 2.5;
   positions[i3 + 2] = Math.sin(t) * r;
 
-  const mix = Math.random();
+  const mix = rand();
 
   // Blue (#25b8ff) -> Purple (#b04dff)
 
