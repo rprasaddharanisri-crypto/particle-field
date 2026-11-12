@@ -96,9 +96,14 @@ geometry.setAttribute(
   new THREE.BufferAttribute(colors, 3)
 );
 
-const material =new THREE.ShaderMaterial({
+const material = new THREE.ShaderMaterial({
   vertexShader,
   fragmentShader,
+
+  uniforms: {
+    uTime: { value: 0 }
+  },
+
   transparent: true,
   depthWrite: false,
   blending: THREE.AdditiveBlending,
@@ -131,7 +136,8 @@ window.addEventListener("resize", () => {
 });
 function animate() {
   requestAnimationFrame(animate);
-
+  material.uniforms.uTime.value =
+  performance.now() * 0.001;
   particles.rotation.y += 0.001;
 
   controls.update();

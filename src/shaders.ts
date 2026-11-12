@@ -1,4 +1,5 @@
 export const vertexShader = `
+uniform float uTime;
 
 varying vec3 vColor;
 
@@ -6,21 +7,31 @@ void main() {
 
   vColor = color;
 
+  vec3 pos = position;
+
+  pos.y +=
+    sin(
+      uTime +
+      position.x * 4.0
+    ) * 0.05;
+
   vec4 mvPosition =
     modelViewMatrix *
-    vec4(position, 1.0);
+    vec4(pos, 1.0);
 
-  gl_PointSize =max(
-    2.0,
-    8.0 * (20.0 / -mvPosition.z)
-  );
+  gl_PointSize =
+    max(
+      2.0,
+      8.0 * (20.0 / -mvPosition.z)
+    );
 
   gl_Position =
     projectionMatrix *
     mvPosition;
-}`;
-
-export const fragmentShader = `varying vec3 vColor;
+}
+`;
+export const fragmentShader = `
+varying vec3 vColor;
 
 void main() {
 
@@ -46,4 +57,5 @@ void main() {
       vColor,
       alpha
     );
-}`;
+}
+`;
