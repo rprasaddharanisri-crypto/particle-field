@@ -38,9 +38,9 @@ const bloom = new UnrealBloomPass(
     window.innerWidth,
     window.innerHeight
   ),
-  1.0,
-  0.4,
-  0.15
+  0.3,
+  0.1,
+  0.5
 );
 
 composer.addPass(bloom);
@@ -69,28 +69,22 @@ for (let i = 0; i < COUNT; i++) {
   const angle = rand() * Math.PI * 2;
   const u = rand();
 
-  const petal =
-    Math.pow(
-      Math.abs(Math.sin(petals * angle)),
-      0.7
-    );
-
   const radius =
-    petal * (0.5 + u * 3.0);
+    (1 + 0.8 * Math.cos(petals * angle))
+    * u * 2.5;
 
   positions[i3] =
     Math.cos(angle) * radius;
 
   positions[i3 + 2] =
     Math.sin(angle) * radius;
+    positions[i3 + 1] =
+  Math.sin(radius * 1.2) * 0.4 * (1 - u);
 
   positions[i3 + 1] =
-    (1.0 - u) *
-    petal *
-    1.2 *
-    (rand() - 0.5);
+    (rand() - 0.5) * 0.15;
 
-  const mix = radius / 3.5;
+  const mix = u;
 
   colors[i3] =
     0.15 * (1 - mix) + 0.69 * mix;
