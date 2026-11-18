@@ -61,19 +61,36 @@ const COUNT = 100000;
 const positions = new Float32Array(COUNT * 3);
 const colors = new Float32Array(COUNT * 3);
 const rand = mulberry32(1857823);
+const petals = 12;
+
 for (let i = 0; i < COUNT; i++) {
   const i3 = i * 3;
 
-  const t = Math.random() * Math.PI * 12;
-  const r = 0.3 + Math.random() * 1.5;
+  const angle = rand() * Math.PI * 2;
+  const u = rand();
 
-  positions[i3] = Math.cos(t) * r;
-  positions[i3 + 1] =(rand() - 0.5) * 2.5;
-  positions[i3 + 2] = Math.sin(t) * r;
+  const petal =
+    Math.pow(
+      Math.abs(Math.sin(petals * angle)),
+      0.7
+    );
 
-  const mix = rand();
+  const radius =
+    petal * (0.5 + u * 3.0);
 
-  // Blue (#25b8ff) -> Purple (#b04dff)
+  positions[i3] =
+    Math.cos(angle) * radius;
+
+  positions[i3 + 2] =
+    Math.sin(angle) * radius;
+
+  positions[i3 + 1] =
+    (1.0 - u) *
+    petal *
+    1.2 *
+    (rand() - 0.5);
+
+  const mix = radius / 3.5;
 
   colors[i3] =
     0.15 * (1 - mix) + 0.69 * mix;
