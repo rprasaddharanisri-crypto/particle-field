@@ -31,11 +31,7 @@ pos.z +=
     modelViewMatrix *
     vec4(pos, 1.0);
 
-  gl_PointSize =
-    max(
-      2.0,
-      8.0 * (20.0 / -mvPosition.z)
-    );
+  gl_PointSize =1.2;
 
   gl_Position =
     projectionMatrix *
@@ -65,9 +61,9 @@ void main() {
   alpha *= alpha;
 
   gl_FragColor =
-    vec4(
-      vColor,
-      alpha
-    );
+  vec4(
+    vColor,
+    alpha * 0.6
+  );
 }
 `;

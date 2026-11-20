@@ -16,7 +16,7 @@ const camera = new THREE.PerspectiveCamera(
   100
 );
 
-camera.position.z = 8;
+camera.position.z = 14;
 
 const renderer = new THREE.WebGLRenderer({
   antialias: true
@@ -38,9 +38,9 @@ const bloom = new UnrealBloomPass(
     window.innerWidth,
     window.innerHeight
   ),
-  0.3,
-  0.1,
-  0.5
+  0.25,
+  0.05,
+  0.85
 );
 
 composer.addPass(bloom);
@@ -56,35 +56,109 @@ composer.setSize(
 document.body.style.margin = "0";
 document.body.appendChild(renderer.domElement);
 
-const COUNT = 100000;
+const COUNT = 250000;
 
 const positions = new Float32Array(COUNT * 3);
 const colors = new Float32Array(COUNT * 3);
 const rand = mulberry32(1857823);
-const petals = 12;
+const petals = 9;
 
 for (let i = 0; i < COUNT; i++) {
+
   const i3 = i * 3;
 
-  const angle = rand() * Math.PI * 2;
-  const u = rand();
+  const petal = Math.floor(rand() * petals);
 
-  const radius =
-    (1 + 0.8 * Math.cos(petals * angle))
-    * u * 2.5;
+  const u = rand();
+  const v = rand() * 2 - 1;
+
+  const rLayer = rand();
+
+  let layer;
+  let layerRot;
+
+let yOffset = 0;
+
+if (rLayer < 0.25) {
+
+  // huge back petals
+  layer = 1.8;
+  layerRot = Math.PI / petals * 0.5;
+  yOffset = -0.2;
+
+} else if (rLayer < 0.5) {
+
+  // outer petals
+  layer = 1.4;
+  layerRot = 0;
+  yOffset = 0;
+
+} else if (rLayer < 0.75) {
+
+  // upper petals
+  layer = 1.0;
+  layerRot = Math.PI / petals;
+  yOffset = 0.8;
+
+} else {
+
+  // inner petals
+  layer = 0.6;
+  layerRot = Math.PI / petals * 0.5;
+  yOffset = 1.5;
+
+}
+
+const baseAngle =
+  petal / petals * Math.PI * 2 +
+  layerRot;
+const tilt =yOffset > 0 ? -0.4 : 0;
+const width =
+  Math.pow(
+    Math.sin(u * Math.PI),
+    0.8
+  ) *
+  (
+    layer > 1.6
+      ? 1.3
+      : 0.8
+  ) *
+  layer;
+
+  const length =
+  Math.pow(u, 0.85) *
+  (
+    layer < 0.5
+      ? 1.2
+      : 3.5
+  ) *
+  layer;
+  const curve =
+    Math.sin(u * Math.PI) * 0.25 +
+    Math.pow(u, 2.2) * 0.9;
+
+  const x = v * width;
+  const petalLift =
+  layer > 1.0
+    ? curve * 0.5        // outer petals
+    : curve * 1.6;       // inner petals
+
+  const y = petalLift + pageYOffset;
+  const z =length +tilt * u;
+
+  const c = Math.cos(baseAngle);
+  const s = Math.sin(baseAngle);
 
   positions[i3] =
-    Math.cos(angle) * radius;
-
-  positions[i3 + 2] =
-    Math.sin(angle) * radius;
-    positions[i3 + 1] =
-  Math.sin(radius * 1.2) * 0.4 * (1 - u);
+    c * z - s * x;
 
   positions[i3 + 1] =
-    (rand() - 0.5) * 0.15;
+    y;
 
-  const mix = u;
+  positions[i3 + 2] =
+    s * z + c * x;
+
+  const mix = Math.pow(u, 1.8);
 
   colors[i3] =
     0.15 * (1 - mix) + 0.69 * mix;
@@ -92,9 +166,18 @@ for (let i = 0; i < COUNT; i++) {
   colors[i3 + 1] =
     0.72 * (1 - mix) + 0.30 * mix;
 
-  colors[i3 + 2] = 1.0;
-}
+  colors[i3 + 2] =
+    1.0;
 
+  // Petal vein
+  if (Math.abs(v) < 0.02) {
+
+    colors[i3] = 0.8;
+    colors[i3 + 1] = 0.95;
+    colors[i3 + 2] = 1.0;
+
+  }
+}
 const geometry = new THREE.BufferGeometry();
 
 geometry.setAttribute(
@@ -126,6 +209,35 @@ const particles = new THREE.Points(
 );
 
 scene.add(particles);
+const sparks: THREE.Mesh[] = [];
+
+for (let i = 0; i < 1000; i++) {
+
+  const spark = new THREE.Mesh(
+    new THREE.SphereGeometry(0.008),
+    new THREE.MeshBasicMaterial({
+      color: 0xff88ff
+    })
+  );
+
+  spark.position.set(
+    (Math.random() - 0.5) * 20,
+    (Math.random() - 0.5) * 8,
+    (Math.random() - 0.5) * 20
+  );
+
+  sparks.push(spark);
+  scene.add(spark);
+}
+const core = new THREE.PointLight(
+  0x8fffff,
+  10,
+  20
+);
+
+core.position.set(0, 0, 0);
+
+scene.add(core);
 window.addEventListener("resize", () => {
 
   camera.aspect =
@@ -149,8 +261,28 @@ function animate() {
   requestAnimationFrame(animate);
   material.uniforms.uTime.value =
   performance.now() * 0.001;
-  particles.rotation.y += 0.001;
+  particles.rotation.y += 0.003;
+  for (let i = 0; i < sparks.length; i++) {
 
+  const spark = sparks[i];
+
+  spark.position.y +=
+    Math.sin(
+      performance.now() * 0.001 +
+      i
+    ) * 0.002;
+  }
+  const pulse =
+  1.0 +
+  Math.sin(
+    performance.now() * 0.001
+  ) * 0.03;
+
+particles.scale.set(
+  pulse,
+  pulse,
+  pulse
+);
   controls.update();
 
   composer.render();
