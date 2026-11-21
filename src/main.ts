@@ -170,13 +170,31 @@ const width =
     1.0;
 
   // Petal vein
-  if (Math.abs(v) < 0.02) {
+const vein =
+  Math.abs(v) < 0.05 ||
+  (u > 0.3 &&
+   Math.abs(v - 0.15 * Math.sin(u * 12.0)) < 0.01) ||
+  (u > 0.4 &&
+   Math.abs(v + 0.15 * Math.sin(u * 10.0)) < 0.01);
 
-    colors[i3] = 0.8;
-    colors[i3 + 1] = 0.95;
-    colors[i3 + 2] = 1.0;
+if (vein) {
 
-  }
+  colors[i3] = 1.0;
+  colors[i3 + 1] = 1.0;
+  colors[i3 + 2] = 1.0;
+
+}
+const edge =
+  Math.abs(v) >
+  width * 0.85;
+
+if (edge) {
+
+  colors[i3] = 1.0;
+  colors[i3 + 1] = 0.5;
+  colors[i3 + 2] = 1.0;
+
+}
 }
 const geometry = new THREE.BufferGeometry();
 
