@@ -16,7 +16,7 @@ const camera = new THREE.PerspectiveCamera(
   100
 );
 
-camera.position.z = 14;
+camera.position.z = 10;
 
 const renderer = new THREE.WebGLRenderer({
   antialias: true
@@ -56,12 +56,12 @@ composer.setSize(
 document.body.style.margin = "0";
 document.body.appendChild(renderer.domElement);
 
-const COUNT = 250000;
+const COUNT = 50000;
 
 const positions = new Float32Array(COUNT * 3);
 const colors = new Float32Array(COUNT * 3);
 const rand = mulberry32(1857823);
-const petals = 9;
+const petals = 7;
 
 for (let i = 0; i < COUNT; i++) {
 
@@ -76,75 +76,84 @@ for (let i = 0; i < COUNT; i++) {
 
   let layer;
   let layerRot;
+  let yOffset = 0;
 
-let yOffset = 0;
+  if (rLayer < 0.20) {
 
-if (rLayer < 0.25) {
+    // giant back petals
+    layer = 1.5;
+    layerRot = Math.PI / petals * 0.5;
+    yOffset = 0;
 
-  // huge back petals
-  layer = 1.8;
-  layerRot = Math.PI / petals * 0.5;
-  yOffset = -0.2;
+  } else if (rLayer < 0.50) {
 
-} else if (rLayer < 0.5) {
+    // outer petals
+    layer = 1.4;
+    layerRot = 0;
+    yOffset = 0.05;
 
-  // outer petals
-  layer = 1.4;
-  layerRot = 0;
-  yOffset = 0;
+  } else if (rLayer < 0.80) {
 
-} else if (rLayer < 0.75) {
+    // upper petals
+    layer = 1.0;
+    layerRot = Math.PI / petals;
+    yOffset = 0.10;
 
-  // upper petals
-  layer = 1.0;
-  layerRot = Math.PI / petals;
-  yOffset = 0.8;
+  } else {
 
-} else {
+    // inner petals
+    layer = 0.6;
+    layerRot = Math.PI / petals * 0.5;
+    yOffset = 0.15;
 
-  // inner petals
-  layer = 0.6;
-  layerRot = Math.PI / petals * 0.5;
-  yOffset = 1.5;
+  }
 
-}
+  const baseAngle =
+    petal / petals * Math.PI * 2 +
+    layerRot +
+    (rand() - 0.5) * 0.15;
 
-const baseAngle =
-  petal / petals * Math.PI * 2 +
-  layerRot;
-const tilt =yOffset > 0 ? -0.4 : 0;
-const width =
+  const petalWidth = 0.8;
+
+  const width =
   Math.pow(
     Math.sin(u * Math.PI),
-    0.8
+    0.35
   ) *
-  (
-    layer > 1.6
-      ? 1.3
-      : 0.8
-  ) *
+  (1.0 - u * 0.15);
+  petalWidth *
   layer;
+
+  const petalLength = 3.5;
+  
 
   const length =
-  Math.pow(u, 0.85) *
-  (
-    layer < 0.5
-      ? 1.2
-      : 3.5
-  ) *
-  layer;
+    Math.pow(u, 0.85) *
+    petalLength *
+    layer;
+
+  //const petalBend =
+    0.8 + rand() * 0.5;
+
   const curve =
-    Math.sin(u * Math.PI) * 0.25 +
-    Math.pow(u, 2.2) * 0.9;
+  Math.sin(u * Math.PI) * 0.4 +
+  Math.pow(u, 1.8) * 0.6;
 
-  const x = v * width;
   const petalLift =
-  layer > 1.0
-    ? curve * 0.5        // outer petals
-    : curve * 1.6;       // inner petals
+    layer > 1.0
+      ? curve * 0.5
+      : curve * 1.6;
+  const x =
+  v *
+  width *
+  (1.0 - u * 0.4);
+  const y =
+  (petalLift * 0.4) +
+  yOffset;
 
-  const y = petalLift + pageYOffset;
-  const z =length +tilt * u;
+const z =
+  length *
+  (0.8 + 0.2 * Math.sin(u * Math.PI));
 
   const c = Math.cos(baseAngle);
   const s = Math.sin(baseAngle);
@@ -169,33 +178,40 @@ const width =
   colors[i3 + 2] =
     1.0;
 
-  // Petal vein
-const vein =
-  Math.abs(v) < 0.05 ||
-  (u > 0.3 &&
-   Math.abs(v - 0.15 * Math.sin(u * 12.0)) < 0.01) ||
-  (u > 0.4 &&
-   Math.abs(v + 0.15 * Math.sin(u * 10.0)) < 0.01);
+  // center + branch veins
+  const vein =
+    Math.abs(v) < 0.05 ||
+    (u > 0.3 &&
+      Math.abs(
+        v - 0.15 * Math.sin(u * 12.0)
+      ) < 0.01) ||
+    (u > 0.4 &&
+      Math.abs(
+        v + 0.15 * Math.sin(u * 10.0)
+      ) < 0.01);
 
-if (vein) {
+  if (vein) {
 
-  colors[i3] = 1.0;
-  colors[i3 + 1] = 1.0;
-  colors[i3 + 2] = 1.0;
+    colors[i3] = 1.0;
+    colors[i3 + 1] = 1.0;
+    colors[i3 + 2] = 1.0;
 
+  }
+
+  // glowing petal edges
+  const edge =
+    Math.abs(v) >
+    width * 0.92;
+
+  if (edge) {
+
+    colors[i3] = 1.0;
+    colors[i3 + 1] = 0.5;
+    colors[i3 + 2] = 1.0;
+
+  }
 }
-const edge =
-  Math.abs(v) >
-  width * 0.85;
 
-if (edge) {
-
-  colors[i3] = 1.0;
-  colors[i3 + 1] = 0.5;
-  colors[i3 + 2] = 1.0;
-
-}
-}
 const geometry = new THREE.BufferGeometry();
 
 geometry.setAttribute(
@@ -229,7 +245,7 @@ const particles = new THREE.Points(
 scene.add(particles);
 const sparks: THREE.Mesh[] = [];
 
-for (let i = 0; i < 1000; i++) {
+for (let i = 0; i < 2000; i++) {
 
   const spark = new THREE.Mesh(
     new THREE.SphereGeometry(0.008),
@@ -295,12 +311,11 @@ function animate() {
   Math.sin(
     performance.now() * 0.001
   ) * 0.03;
-
-particles.scale.set(
-  pulse,
-  pulse,
-  pulse
-);
+  particles.scale.set(
+    pulse,
+    pulse,
+    pulse
+  );
   controls.update();
 
   composer.render();

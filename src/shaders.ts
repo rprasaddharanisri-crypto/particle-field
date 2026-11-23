@@ -31,7 +31,7 @@ pos.z +=
     modelViewMatrix *
     vec4(pos, 1.0);
 
-  gl_PointSize =1.2;
+  gl_PointSize =3.0;
 
   gl_Position =
     projectionMatrix *
