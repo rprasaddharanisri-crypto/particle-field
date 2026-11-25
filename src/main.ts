@@ -246,6 +246,26 @@ const particles = new THREE.Points(
 );
 
 scene.add(particles);
+const dust: THREE.Mesh[] = [];
+for (let i = 0; i < 3000; i++) {
+
+  const particle = new THREE.Mesh(
+    new THREE.SphereGeometry(0.003),
+    new THREE.MeshBasicMaterial({
+      color: 0xffffff
+    })
+  );
+
+  particle.position.set(
+    (Math.random() - 0.5) * 12,
+    (Math.random() - 0.5) * 6,
+    (Math.random() - 0.5) * 12
+  );
+
+  dust.push(particle);
+  scene.add(particle);
+
+}
 const sparks: THREE.Mesh[] = [];
 
 for (let i = 0; i < 2000; i++) {
@@ -268,6 +288,7 @@ for (let i = 0; i < 2000; i++) {
   sparks.push(spark);
   scene.add(spark);
 }
+
 const core = new THREE.PointLight(
   0x8fffff,
   22,
@@ -394,6 +415,16 @@ coreSphere.scale.set(
   glowPulse,
   glowPulse
 );
+for (let i = 0; i < dust.length; i++) {
+
+  const particle = dust[i];
+
+  particle.position.y +=
+    Math.sin(
+      performance.now() * 0.0005 + i
+    ) * 0.0005;
+
+}
   controls.update();
 
   composer.render();
