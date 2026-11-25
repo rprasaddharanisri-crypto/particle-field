@@ -177,22 +177,35 @@ layer;
   const mix = Math.pow(u, 1.8);
 
   colors[i3] =
-    0.15 * (1 - mix) + 0.69 * mix;
+  0.05 * (1 - mix) + 0.75 * mix;
 
-  colors[i3 + 1] =
-    0.72 * (1 - mix) + 0.30 * mix;
+colors[i3 + 1] =
+  0.90 * (1 - mix) + 0.25 * mix;
 
-  colors[i3 + 2] =
-    1.0;
+colors[i3 + 2] =
+  1.0;
 
   // Petal vein
-  if (Math.abs(v) < 0.03) {
+  const vein =
+  Math.abs(v) < 0.03 ||
 
-    colors[i3] = 0.8;
-    colors[i3 + 1] = 0.95;
-    colors[i3 + 2] = 1.0;
+  (u > 0.25 &&
+   Math.abs(
+     v - 0.12 * Math.sin(u * 10.0)
+   ) < 0.01) ||
 
-  }
+  (u > 0.35 &&
+   Math.abs(
+     v + 0.12 * Math.sin(u * 8.0)
+   ) < 0.01);
+
+if (vein) {
+
+  colors[i3] = 0.85;
+  colors[i3 + 1] = 0.95;
+  colors[i3 + 2] = 1.0;
+
+}
 }
 const geometry = new THREE.BufferGeometry();
 
@@ -249,8 +262,8 @@ for (let i = 0; i < 2000; i++) {
 }
 const core = new THREE.PointLight(
   0x8fffff,
-  10,
-  20
+  22,
+  35
 );
 
 core.position.set(0, 0, 0);
@@ -355,7 +368,7 @@ particles.scale.set(
   1 +
   Math.sin(
     performance.now() * 0.003
-  ) * 0.15;
+  ) * 0.25;
 
 coreSphere.scale.set(
   corePulse,
