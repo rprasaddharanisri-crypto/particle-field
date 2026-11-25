@@ -16,7 +16,17 @@ const camera = new THREE.PerspectiveCamera(
   100
 );
 
-camera.position.z = 14;
+camera.position.set(
+  0,
+  2,
+  12
+);
+
+camera.lookAt(
+  0,
+  0,
+  0
+);
 
 const renderer = new THREE.WebGLRenderer({
   antialias: true
@@ -84,7 +94,7 @@ if (rLayer < 0.25) {
   // huge back petals
   layer = 1.8;
   layerRot = Math.PI / petals * 0.5;
-  yOffset = -0.2;
+  yOffset = -0.02;
 
 } else if (rLayer < 0.5) {
 
@@ -98,32 +108,38 @@ if (rLayer < 0.25) {
   // upper petals
   layer = 1.0;
   layerRot = Math.PI / petals;
-  yOffset = 0.8;
+  yOffset = 0.05;
 
 } else {
 
   // inner petals
   layer = 0.6;
   layerRot = Math.PI / petals * 0.5;
-  yOffset = 1.5;
+  yOffset = 0.10;
 
 }
 
 const baseAngle =
   petal / petals * Math.PI * 2 +
-  layerRot;
+  layerRot +
+  (rand() - 0.5) * 0.03;
 const tilt =yOffset > 0 ? -0.4 : 0;
 const width =
-  Math.pow(
-    Math.sin(u * Math.PI),
-    0.8
-  ) *
-  (
-    layer > 1.6
-      ? 1.3
-      : 0.8
-  ) *
-  layer;
+(
+  Math.sin(u * Math.PI) *
+  (1.0 - u * 0.20)
+) *
+(
+  0.8 +
+  0.25 *
+  Math.sin(u * Math.PI)
+) *
+(
+  layer > 1.6
+    ? 1.3
+    : 0.8
+) *
+layer;
 
   const length =
   Math.pow(u, 0.85) *
@@ -137,7 +153,7 @@ const width =
     Math.sin(u * Math.PI) * 0.25 +
     Math.pow(u, 2.2) * 0.9;
 
-  const x = v * width;
+  const x = v * width * (1.0 - u * 0.25);
   const petalLift =
   layer > 1.0
     ? curve * 0.5        // outer petals
@@ -170,7 +186,7 @@ const width =
     1.0;
 
   // Petal vein
-  if (Math.abs(v) < 0.02) {
+  if (Math.abs(v) < 0.03) {
 
     colors[i3] = 0.8;
     colors[i3 + 1] = 0.95;
@@ -211,12 +227,14 @@ const particles = new THREE.Points(
 scene.add(particles);
 const sparks: THREE.Mesh[] = [];
 
-for (let i = 0; i < 1000; i++) {
-
+for (let i = 0; i < 2000; i++) {
   const spark = new THREE.Mesh(
     new THREE.SphereGeometry(0.008),
     new THREE.MeshBasicMaterial({
-      color: 0xff88ff
+      color:
+  Math.random() > 0.5
+    ? 0xff88ff
+    : 0x8fffff
     })
   );
 
@@ -238,6 +256,42 @@ const core = new THREE.PointLight(
 core.position.set(0, 0, 0);
 
 scene.add(core);
+const coreSphere = new THREE.Mesh(
+  new THREE.SphereGeometry(0.12, 24, 24),
+  new THREE.MeshBasicMaterial({
+    color: 0x8fffff
+  })
+);
+
+scene.add(coreSphere);
+const coreGlow = new THREE.PointLight(
+  0xffffff,
+  5,
+  8
+);
+coreGlow.position.set(
+  0,
+  0,
+  0
+);
+
+scene.add(coreGlow);
+const aura = new THREE.PointLight(
+  0xaaffff,
+  2,
+  50
+);
+
+aura.position.set(
+  0,
+  0,
+  0
+);
+
+scene.add(aura);
+coreGlow.position.set(0, 0, 0);
+
+scene.add(coreGlow);
 window.addEventListener("resize", () => {
 
   camera.aspect =
@@ -261,27 +315,63 @@ function animate() {
   requestAnimationFrame(animate);
   material.uniforms.uTime.value =
   performance.now() * 0.001;
-  particles.rotation.y += 0.003;
+  particles.rotation.y += 0.0005;
   for (let i = 0; i < sparks.length; i++) {
 
   const spark = sparks[i];
 
   spark.position.y +=
-    Math.sin(
-      performance.now() * 0.001 +
-      i
-    ) * 0.002;
+  Math.sin(
+    performance.now() * 0.001 +
+    i
+  ) * 0.003;
+
+spark.position.x +=
+  Math.cos(
+    performance.now() * 0.0005 +
+    i
+  ) * 0.0005;
+  spark.position.x +=
+  Math.cos(
+    performance.now() * 0.0003 + i
+  ) * 0.0004;
+
+spark.position.z +=
+  Math.sin(
+    performance.now() * 0.0003 + i
+  ) * 0.0004;
   }
   const pulse =
   1.0 +
   Math.sin(
     performance.now() * 0.001
   ) * 0.03;
-
 particles.scale.set(
   pulse,
   pulse,
   pulse
+);
+  const corePulse =
+  1 +
+  Math.sin(
+    performance.now() * 0.003
+  ) * 0.15;
+
+coreSphere.scale.set(
+  corePulse,
+  corePulse,
+  corePulse
+);
+const glowPulse =
+  1.0 +
+  Math.sin(
+    performance.now() * 0.002
+  ) * 0.2;
+
+coreSphere.scale.set(
+  glowPulse,
+  glowPulse,
+  glowPulse
 );
   controls.update();
 
