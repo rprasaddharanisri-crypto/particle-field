@@ -175,7 +175,7 @@ layer;
     s * z + c * x;
 
   const mix = Math.pow(u, 1.8);
-
+  
   colors[i3] =
   0.05 * (1 - mix) + 0.75 * mix;
 
@@ -184,7 +184,8 @@ colors[i3 + 1] =
 
 colors[i3 + 2] =
   1.0;
-
+  const tipGlow =
+  Math.pow(u, 3.0);
   // Petal vein
   const vein =
   Math.abs(v) < 0.03 ||
@@ -201,10 +202,17 @@ colors[i3 + 2] =
 
 if (vein) {
 
-  colors[i3] = 0.85;
-  colors[i3 + 1] = 0.95;
-  colors[i3 + 2] = 1.0;
+  const glow =
+    0.9 +
+    0.1 *
+    Math.sin(
+      u * 25.0
+    );
 
+  colors[i3] = glow;
+  colors[i3 + 1] = glow;
+  colors[i3 + 2] =
+  1.0 + tipGlow * 0.2;
 }
 }
 const geometry = new THREE.BufferGeometry();
